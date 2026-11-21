@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# VM del TFM: Ubuntu 24.04 solo con terminal y K3s de un nodo,
+# equivalente a la EC2 que se usará en AWS.
+#
+# "vagrant up" deja la plataforma completa:
+#   install-k3s.sh  -> K3s (con Traefik)
+#   bootstrap.sh    -> Argo CD, Argo Rollouts, Secret de Grafana y Applications.
+#                      Argo CD despliega el resto (microservicios y observabilidad) desde tfm-gitops.
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/ubuntu-24.04"
+  config.vm.hostname = "tfm-k3s"   # cambiar-escenario.sh usa este nombre para saber si está dentro de la VM
+
+  # Red solo-host: la VM es accesible desde el equipo en 192.168.56.20
+  config.vm.network "private_network", ip: "192.168.56.20"
+
+  # La carpeta "practica" (dos niveles arriba) se ve dentro de la VM en /tfm.
+  # Esta carpeta (vagrant/) se ve en /vagrant, como en cualquier Vagrantfile.
+  config.vm.synced_folder "../..", "/tfm"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name   = "tfm-k3s"
+    vb.cpus   = 4
+    vb.memory = 12288
+    vb.gui    = false
+  end
+
+  config.vm.provision "k3s",       type: "shell", path: "scripts/install-k3s.sh"
+  config.vm.provision "bootstrap", type: "shell", path: "scripts/bootstrap.sh"
+end

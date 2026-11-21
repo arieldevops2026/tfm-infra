@@ -1,0 +1,15 @@
+# Vagrant: estado local de la VM
+.vagrant/
+
+# Imágenes exportadas a mano (docker save). Ya no se usan: K3s descarga de ghcr.io
+vagrant/images/
+*.tar
+
+# Terraform: estado, planes y credenciales nunca van a Git
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+*.tfvars
+!*.example.tfvars
